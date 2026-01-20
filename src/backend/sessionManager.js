@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const crypto = require('crypto');
+const { randomUUID } = require('crypto');
 
 class SessionManager extends EventEmitter {
   constructor() {
@@ -8,7 +8,7 @@ class SessionManager extends EventEmitter {
   }
 
   createSession(browserContext, page) {
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     const session = {
       id,
       browserContext,
