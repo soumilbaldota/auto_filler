@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.log
+browser-data/
+screenshots/
+downloads/
+.DS_Store
+dist/
+build/
+*.crx
+extensions/
+playwright-state/
