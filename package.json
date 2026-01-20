@@ -1,13 +1,17 @@
 {
   "name": "auto-filler",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Automated job application system with Playwright and Simplify extension",
-  "main": "src/backend/server.js",
+  "main": "src/backend/appServer.js",
   "scripts": {
     "start": "node src/backend/server.js",
-    "dev": "nodemon src/backend/server.js",
+    "app": "node src/backend/appServer.js",
+    "dev": "nodemon src/backend/appServer.js",
+    "dev:old": "nodemon src/backend/server.js",
     "docker:build": "docker build -t auto-filler-browser .",
-    "docker:run": "docker-compose up"
+    "docker:build:vnc": "docker build -f Dockerfile.vnc -t auto-filler-vnc .",
+    "docker:run": "docker-compose up",
+    "docker:vnc": "docker-compose -f docker-compose.vnc.yml up"
   },
   "keywords": ["automation", "playwright", "job-application"],
   "author": "",

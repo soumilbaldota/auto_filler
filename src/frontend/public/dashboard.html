@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Filler - Job Application Dashboard</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            min-height: 100vh;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--gray-900);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-700);
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        .nav {
+            flex: 1;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: var(--gray-700);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--primary-dark);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .nav-item.active .badge {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--gray-700);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .connection-dot.disconnected {
+            background: var(--danger);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--gray-900);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        .btn-outline:hover {
+            background: var(--gray-50);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stat-card .value.primary { color: var(--primary); }
+        .stat-card .value.success { color: var(--success); }
+        .stat-card .value.warning { color: var(--warning); }
+        .stat-card .value.danger { color: var(--danger); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--gray-200);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--gray-500);
+        }
+
+        .tab:hover {
+            color: var(--gray-700);
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--gray-900);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Panels */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Search Panel */
+        .search-config {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .search-config h3 {
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .progress-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        /* Jobs Table */
+        .jobs-table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .table-header h3 {
+            color: var(--gray-900);
+        }
+
+        .jobs-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .jobs-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .jobs-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .jobs-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .job-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .job-company {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .ats-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.pending { background: #fef3c7; color: #92400e; }
+        .status-badge.approved { background: #dbeafe; color: #1e40af; }
+        .status-badge.rejected { background: #fee2e2; color: #991b1b; }
+        .status-badge.applying { background: #e0e7ff; color: #3730a3; }
+        .status-badge.completed { background: #d1fae5; color: #065f46; }
+        .status-badge.error { background: #fee2e2; color: #991b1b; }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.approve {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-btn.reject {
+            background: var(--danger);
+            color: white;
+        }
+
+        .action-btn.apply {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.view {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        /* Sessions Grid */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .session-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .session-job-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 16px;
+        }
+
+        .session-job-company {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .session-progress {
+            margin: 16px 0;
+        }
+
+        .session-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 8px;
+        }
+
+        .session-events {
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 12px;
+        }
+
+        .session-event {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .session-event:last-child {
+            border-bottom: none;
+        }
+
+        .session-event-time {
+            color: var(--gray-400);
+            margin-right: 8px;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .vnc-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            flex: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        /* Notifications Panel */
+        .notifications-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 360px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .notification-toast {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification-toast.info { border-color: var(--primary); }
+        .notification-toast.success { border-color: var(--success); }
+        .notification-toast.warning { border-color: var(--warning); }
+        .notification-toast.error { border-color: var(--danger); }
+
+        .notification-toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .notification-toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-900);
+        }
+
+        .notification-toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-400);
+            font-size: 18px;
+        }
+
+        .notification-toast-body {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            color: var(--gray-900);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-400);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* VNC Iframe */
+        .vnc-container {
+            width: 100%;
+            height: 500px;
+            border: none;
+            background: #000;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <span>Auto Filler</span>
+            </div>
+            
+            <nav class="nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Workflow</div>
+                    <div class="nav-item active" data-panel="lookup" onclick="showPanel('lookup')">
+                        <span>🔍</span>
+                        <span>Job Lookup</span>
+                        <span class="badge" id="navJobCount">0</span>
+                    </div>
+                    <div class="nav-item" data-panel="approval" onclick="showPanel('approval')">
+                        <span>✅</span>
+                        <span>Approval</span>
+                        <span class="badge" id="navPendingCount">0</span>
+                    </div>
+                    <div class="nav-item" data-panel="sessions" onclick="showPanel('sessions')">
+                        <span>🖥️</span>
+                        <span>Sessions</span>
+                        <span class="badge" id="navSessionCount">0</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Views</div>
+                    <div class="nav-item" data-panel="completed" onclick="showPanel('completed')">
+                        <span>🎉</span>
+                        <span>Completed</span>
+                        <span class="badge" id="navCompletedCount">0</span>
+                    </div>
+                    <div class="nav-item" data-panel="notifications" onclick="showPanel('notifications')">
+                        <span>🔔</span>
+                        <span>Activity Log</span>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="connection-status">
+                <div class="connection-dot" id="connectionDot"></div>
+                <span id="connectionStatus">Connecting...</span>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <h1 id="panelTitle">Job Lookup</h1>
+                <div class="header-actions" id="headerActions">
+                    <!-- Dynamic actions based on panel -->
+                </div>
+            </header>
+            
+            <div class="content">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="label">Jobs Found</div>
+                        <div class="value" id="statJobsFound">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Pending Approval</div>
+                        <div class="value warning" id="statPending">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Approved</div>
+                        <div class="value primary" id="statApproved">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Active Sessions</div>
+                        <div class="value primary" id="statActiveSessions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Waiting for User</div>
+                        <div class="value warning" id="statWaiting">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Completed</div>
+                        <div class="value success" id="statCompleted">0</div>
+                    </div>
+                </div>
+
+                <!-- Lookup Panel -->
+                <div class="panel active" id="panel-lookup">
+                    <div class="search-config">
+                        <h3>🔍 Search Configuration</h3>
+                        <div class="form-group">
+                            <label for="searchQuery">Search Query</label>
+                            <input type="text" id="searchQuery" placeholder="e.g., Summer 2026 software intern" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="atsDomains">ATS Domains (comma-separated)</label>
+                            <input type="text" id="atsDomains" value="lever.co,greenhouse.io,workday.com,myworkdayjobs.com,taleo.net,icims.com,smartrecruiters.com">
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn btn-primary" onclick="startSearch()" id="searchBtn">
+                                🚀 Start Search
+                            </button>
+                            <button class="btn btn-outline" onclick="stopSearch()" id="stopSearchBtn" disabled>
+                                ⏹️ Stop
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container" id="searchProgress" style="display: none;">
+                        <h3>Search Progress</h3>
+                        <div class="progress-bar">
+                            <div class="fill" id="searchProgressFill" style="width: 0%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--gray-500);">
+                            <span id="searchStatus">Searching...</span>
+                            <span id="searchCount">0 jobs found</span>
+                        </div>
+                    </div>
+                    
+                    <div class="jobs-table-container">
+                        <div class="table-header">
+                            <h3>Found Jobs</h3>
+                            <button class="btn btn-outline" onclick="clearJobs()">Clear All</button>
+                        </div>
+                        <table class="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Job</th>
+                                    <th>ATS</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lookupJobsBody">
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🔍</div>
+                                            <h3>No jobs found yet</h3>
+                                            <p>Start a search to find job applications</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Approval Panel -->
+                <div class="panel" id="panel-approval">
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+                        <button class="btn btn-success" onclick="approveAllJobs()">✅ Approve All Pending</button>
+                        <button class="btn btn-primary" onclick="launchApprovedSessions()">🚀 Launch All Approved</button>
+                    </div>
+                    
+                    <div class="jobs-table-container">
+                        <div class="table-header">
+                            <h3>Jobs Pending Approval</h3>
+                        </div>
+                        <table class="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>ATS</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalJobsBody">
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">✅</div>
+                                            <h3>No pending jobs</h3>
+                                            <p>Search for jobs first</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sessions Panel -->
+                <div class="panel" id="panel-sessions">
+                    <div class="sessions-grid" id="sessionsGrid">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🖥️</div>
+                            <h3>No active sessions</h3>
+                            <p>Approve jobs and launch sessions to start applying</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Panel -->
+                <div class="panel" id="panel-completed">
+                    <div class="jobs-table-container">
+                        <div class="table-header">
+                            <h3>Completed Applications</h3>
+                        </div>
+                        <table class="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Company</th>
+                                    <th>Completed At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completedJobsBody">
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🎉</div>
+                                            <h3>No completed applications yet</h3>
+                                            <p>Complete applications to see them here</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Notifications Panel -->
+                <div class="panel" id="panel-notifications">
+                    <div class="jobs-table-container">
+                        <div class="table-header">
+                            <h3>Activity Log</h3>
+                            <button class="btn btn-outline" onclick="clearNotifications()">Clear</button>
+                        </div>
+                        <div id="activityLog" style="padding: 20px; max-height: 600px; overflow-y: auto;">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <h3>No activity yet</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notifications Toast Container -->
+    <div class="notifications-panel" id="toastContainer"></div>
+
+    <!-- VNC Modal -->
+    <div class="modal-overlay" id="vncModal">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="vncModalTitle">Remote Session</h2>
+                <button class="modal-close" onclick="closeVncModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; color: var(--gray-500);">
+                    Connect to the browser session to complete the application manually.
+                </p>
+                <div id="vncContent">
+                    <!-- VNC iframe or instructions will go here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeVncModal()">Close</button>
+                <button class="btn btn-success" onclick="markSessionComplete()" id="markCompleteBtn">
+                    ✅ Mark as Complete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        const WS_URL = `ws://${window.location.hostname}:3001`;
+        
+        let ws = null;
+        let jobs = [];
+        let sessions = [];
+        let activityLog = [];
+        let currentVncSessionId = null;
+        let currentPanel = 'lookup';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+            loadInitialData();
+        });
+
+        // WebSocket Connection
+        function connectWebSocket() {
+            ws = new WebSocket(WS_URL);
+
+            ws.onopen = () => {
+                updateConnectionStatus(true);
+            };
+
+            ws.onmessage = (event) => {
+                handleWebSocketMessage(JSON.parse(event.data));
+            };
+
+            ws.onclose = () => {
+                updateConnectionStatus(false);
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = () => {
+                updateConnectionStatus(false);
+            };
+        }
+
+        function updateConnectionStatus(connected) {
+            document.getElementById('connectionDot').classList.toggle('disconnected', !connected);
+            document.getElementById('connectionStatus').textContent = connected ? 'Connected' : 'Disconnected';
+        }
+
+        function handleWebSocketMessage(message) {
+            console.log('WS:', message);
+
+            switch (message.type) {
+                case 'initial_state':
+                    jobs = message.data.jobs || [];
+                    sessions = message.data.sessions || [];
+                    updateAllViews();
+                    break;
+                case 'search_progress':
+                    updateSearchProgress(message.data);
+                    break;
+                case 'job_found':
+                    jobs.push(message.data);
+                    updateAllViews();
+                    break;
+                case 'search_completed':
+                    searchComplete();
+                    break;
+                case 'job_updated':
+                case 'jobs_bulk_updated':
+                    loadJobs();
+                    break;
+                case 'session_created':
+                case 'session_updated':
+                    updateSession(message.data);
+                    break;
+                case 'session_deleted':
+                    removeSession(message.data.id);
+                    break;
+                case 'notification':
+                    showToast(message.data.notification, message.data.job);
+                    addToActivityLog(message.data);
+                    break;
+                case 'autofill_complete':
+                    showToast({
+                        type: 'success',
+                        message: `Autofill complete for ${message.data.job.title}. Please review!`
+                    });
+                    loadSessions();
+                    break;
+                case 'session_completed':
+                    showToast({
+                        type: 'success',
+                        message: `Application completed for ${message.data.job.title}!`
+                    });
+                    loadJobs();
+                    loadSessions();
+                    break;
+            }
+        }
+
+        // API Functions
+        async function loadInitialData() {
+            await Promise.all([loadJobs(), loadSessions()]);
+        }
+
+        async function loadJobs() {
+            try {
+                const res = await fetch(`${API_URL}/api/jobs`);
+                const data = await res.json();
+                if (data.success) {
+                    jobs = data.jobs;
+                    updateAllViews();
+                }
+            } catch (e) {
+                console.error('Error loading jobs:', e);
+            }
+        }
+
+        async function loadSessions() {
+            try {
+                const res = await fetch(`${API_URL}/api/sessions`);
+                const data = await res.json();
+                if (data.success) {
+                    sessions = data.sessions;
+                    updateAllViews();
+                }
+            } catch (e) {
+                console.error('Error loading sessions:', e);
+            }
+        }
+
+        async function startSearch() {
+            const searchQuery = document.getElementById('searchQuery').value || undefined;
+            const atsDomains = document.getElementById('atsDomains').value.split(',').map(d => d.trim()).filter(d => d);
+
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('stopSearchBtn').disabled = false;
+            document.getElementById('searchProgress').style.display = 'block';
+
+            try {
+                await fetch(`${API_URL}/api/jobs/search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ searchQuery, atsDomains })
+                });
+            } catch (e) {
+                console.error('Error starting search:', e);
+                showToast({ type: 'error', message: 'Failed to start search' });
+            }
+        }
+
+        async function stopSearch() {
+            try {
+                await fetch(`${API_URL}/api/jobs/search/stop`, { method: 'POST' });
+                searchComplete();
+            } catch (e) {
+                console.error('Error stopping search:', e);
+            }
+        }
+
+        function updateSearchProgress(progress) {
+            const percentage = progress.totalPages > 0 
+                ? Math.round((progress.currentPage / progress.totalPages) * 100) 
+                : 0;
+            
+            document.getElementById('searchProgressFill').style.width = `${percentage}%`;
+            document.getElementById('searchStatus').textContent = 
+                progress.status === 'searching' ? `Searching... (Page ${progress.currentPage}/${progress.totalPages})` : progress.status;
+            document.getElementById('searchCount').textContent = `${progress.jobsFound} jobs found`;
+        }
+
+        function searchComplete() {
+            document.getElementById('searchBtn').disabled = false;
+            document.getElementById('stopSearchBtn').disabled = true;
+            document.getElementById('searchStatus').textContent = 'Search complete';
+            loadJobs();
+        }
+
+        async function clearJobs() {
+            if (!confirm('Clear all collected jobs?')) return;
+            try {
+                await fetch(`${API_URL}/api/jobs`, { method: 'DELETE' });
+                jobs = [];
+                updateAllViews();
+            } catch (e) {
+                console.error('Error clearing jobs:', e);
+            }
+        }
+
+        async function approveJob(jobId) {
+            try {
+                await fetch(`${API_URL}/api/jobs/${jobId}/approve`, { method: 'POST' });
+                loadJobs();
+            } catch (e) {
+                console.error('Error approving job:', e);
+            }
+        }
+
+        async function rejectJob(jobId) {
+            try {
+                await fetch(`${API_URL}/api/jobs/${jobId}/reject`, { method: 'POST' });
+                loadJobs();
+            } catch (e) {
+                console.error('Error rejecting job:', e);
+            }
+        }
+
+        async function approveAllJobs() {
+            try {
+                const res = await fetch(`${API_URL}/api/jobs/approve-all`, { method: 'POST' });
+                const data = await res.json();
+                showToast({ type: 'success', message: `Approved ${data.count} jobs` });
+                loadJobs();
+            } catch (e) {
+                console.error('Error approving all jobs:', e);
+            }
+        }
+
+        async function launchSession(jobId) {
+            try {
+                const res = await fetch(`${API_URL}/api/jobs/${jobId}/apply`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast({ type: 'success', message: 'Session launched!' });
+                    loadJobs();
+                    loadSessions();
+                } else {
+                    showToast({ type: 'error', message: data.error });
+                }
+            } catch (e) {
+                console.error('Error launching session:', e);
+            }
+        }
+
+        async function launchApprovedSessions() {
+            try {
+                const res = await fetch(`${API_URL}/api/jobs/apply-all`, { method: 'POST' });
+                const data = await res.json();
+                showToast({ type: 'success', message: `Launched ${data.count} sessions` });
+                loadJobs();
+                loadSessions();
+            } catch (e) {
+                console.error('Error launching sessions:', e);
+            }
+        }
+
+        async function closeSession(sessionId) {
+            if (!confirm('Close this session?')) return;
+            try {
+                await fetch(`${API_URL}/api/sessions/${sessionId}`, { method: 'DELETE' });
+                loadSessions();
+                loadJobs();
+            } catch (e) {
+                console.error('Error closing session:', e);
+            }
+        }
+
+        async function markSessionComplete() {
+            if (!currentVncSessionId) return;
+            try {
+                await fetch(`${API_URL}/api/sessions/${currentVncSessionId}/complete`, { method: 'POST' });
+                closeVncModal();
+                loadJobs();
+                loadSessions();
+                showToast({ type: 'success', message: 'Application marked as complete!' });
+            } catch (e) {
+                console.error('Error marking complete:', e);
+            }
+        }
+
+        // Session Management
+        function updateSession(sessionData) {
+            const idx = sessions.findIndex(s => s.id === sessionData.id);
+            if (idx >= 0) {
+                sessions[idx] = sessionData;
+            } else {
+                sessions.push(sessionData);
+            }
+            updateAllViews();
+        }
+
+        function removeSession(sessionId) {
+            sessions = sessions.filter(s => s.id !== sessionId);
+            updateAllViews();
+        }
+
+        // UI Updates
+        function updateAllViews() {
+            updateStats();
+            updateNavBadges();
+            renderLookupJobs();
+            renderApprovalJobs();
+            renderSessions();
+            renderCompletedJobs();
+        }
+
+        function updateStats() {
+            document.getElementById('statJobsFound').textContent = jobs.length;
+            document.getElementById('statPending').textContent = jobs.filter(j => j.status === 'pending').length;
+            document.getElementById('statApproved').textContent = jobs.filter(j => j.status === 'approved').length;
+            document.getElementById('statActiveSessions').textContent = 
+                sessions.filter(s => ['initializing', 'loading', 'autofilling'].includes(s.status)).length;
+            document.getElementById('statWaiting').textContent = 
+                sessions.filter(s => s.status === 'waiting_for_user').length;
+            document.getElementById('statCompleted').textContent = jobs.filter(j => j.status === 'completed').length;
+        }
+
+        function updateNavBadges() {
+            document.getElementById('navJobCount').textContent = jobs.length;
+            document.getElementById('navPendingCount').textContent = jobs.filter(j => j.status === 'pending').length;
+            document.getElementById('navSessionCount').textContent = sessions.length;
+            document.getElementById('navCompletedCount').textContent = jobs.filter(j => j.status === 'completed').length;
+        }
+
+        function renderLookupJobs() {
+            const tbody = document.getElementById('lookupJobsBody');
+            if (jobs.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <h3>No jobs found yet</h3>
+                            <p>Start a search to find job applications</p>
+                        </div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = jobs.map(job => `
+                <tr>
+                    <td><input type="checkbox" data-job-id="${job.id}"></td>
+                    <td>
+                        <div class="job-title">${escapeHtml(job.title)}</div>
+                        <div class="job-company">${escapeHtml(job.company)}</div>
+                    </td>
+                    <td><span class="ats-badge">${job.atsType}</span></td>
+                    <td><span class="status-badge ${job.status}">${job.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            ${job.status === 'pending' ? `
+                                <button class="action-btn approve" onclick="approveJob('${job.id}')">Approve</button>
+                                <button class="action-btn reject" onclick="rejectJob('${job.id}')">Reject</button>
+                            ` : ''}
+                            ${job.status === 'approved' ? `
+                                <button class="action-btn apply" onclick="launchSession('${job.id}')">Apply</button>
+                            ` : ''}
+                            <button class="action-btn view" onclick="window.open('${job.url}', '_blank')">View</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderApprovalJobs() {
+            const tbody = document.getElementById('approvalJobsBody');
+            const pendingJobs = jobs.filter(j => j.status === 'pending');
+            
+            if (pendingJobs.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="3">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h3>No pending jobs</h3>
+                            <p>All jobs have been reviewed</p>
+                        </div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = pendingJobs.map(job => `
+                <tr>
+                    <td>
+                        <div class="job-title">${escapeHtml(job.title)}</div>
+                        <div class="job-company">${escapeHtml(job.company)}</div>
+                    </td>
+                    <td><span class="ats-badge">${job.atsType}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn approve" onclick="approveJob('${job.id}')">✅ Approve</button>
+                            <button class="action-btn reject" onclick="rejectJob('${job.id}')">❌ Reject</button>
+                            <button class="action-btn view" onclick="window.open('${job.url}', '_blank')">👁️ View</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSessions() {
+            const grid = document.getElementById('sessionsGrid');
+            const activeSessions = sessions.filter(s => s.status !== 'completed');
+            
+            if (activeSessions.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🖥️</div>
+                        <h3>No active sessions</h3>
+                        <p>Approve jobs and launch sessions to start applying</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = activeSessions.map(session => `
+                <div class="session-card">
+                    <div class="session-card-header">
+                        <div>
+                            <div class="session-job-title">${escapeHtml(session.job.title)}</div>
+                            <div class="session-job-company">${escapeHtml(session.job.company)} • ${session.job.atsType}</div>
+                        </div>
+                        <span class="status-badge ${session.status}">${formatStatus(session.status)}</span>
+                    </div>
+                    
+                    <div class="session-progress">
+                        <div class="session-progress-label">
+                            <span>Simplify Status</span>
+                            <span>${session.simplifyStatus?.autofillCompleted ? '✅ Complete' : session.simplifyStatus?.autofillStarted ? '⏳ In Progress' : '⏸️ Waiting'}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="fill" style="width: ${session.simplifyStatus?.autofillCompleted ? '100' : session.simplifyStatus?.autofillStarted ? '60' : '20'}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="session-events">
+                        ${(session.events || []).slice(-5).map(e => `
+                            <div class="session-event">
+                                <span class="session-event-time">${formatTime(e.timestamp)}</span>
+                                ${escapeHtml(e.message)}
+                            </div>
+                        `).join('') || '<div style="color: var(--gray-400);">No events yet</div>'}
+                    </div>
+                    
+                    <div class="session-actions">
+                        ${session.status === 'waiting_for_user' ? `
+                            <button class="btn vnc-btn" onclick="openVncModal('${session.id}', '${escapeHtml(session.job.title)}')">
+                                🖥️ Open Remote Session
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-outline" onclick="takeScreenshot('${session.id}')">📸</button>
+                        <button class="btn btn-danger" onclick="closeSession('${session.id}')">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCompletedJobs() {
+            const tbody = document.getElementById('completedJobsBody');
+            const completedJobs = jobs.filter(j => j.status === 'completed');
+            
+            if (completedJobs.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="3">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎉</div>
+                            <h3>No completed applications yet</h3>
+                        </div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = completedJobs.map(job => `
+                <tr>
+                    <td>
+                        <div class="job-title">${escapeHtml(job.title)}</div>
+                    </td>
+                    <td>${escapeHtml(job.company)}</td>
+                    <td>${job.completedAt ? new Date(job.completedAt).toLocaleString() : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Panel Navigation
+        function showPanel(panelName) {
+            currentPanel = panelName;
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.panel === panelName);
+            });
+            
+            // Update panels
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === `panel-${panelName}`);
+            });
+            
+            // Update title
+            const titles = {
+                lookup: 'Job Lookup',
+                approval: 'Job Approval',
+                sessions: 'Active Sessions',
+                completed: 'Completed Applications',
+                notifications: 'Activity Log'
+            };
+            document.getElementById('panelTitle').textContent = titles[panelName] || panelName;
+        }
+
+        // VNC Modal
+        function openVncModal(sessionId, jobTitle) {
+            currentVncSessionId = sessionId;
+            document.getElementById('vncModalTitle').textContent = `Remote Session - ${jobTitle}`;
+            
+            const session = sessions.find(s => s.id === sessionId);
+            const vncContent = document.getElementById('vncContent');
+            
+            if (session?.vnc?.noVncUrl) {
+                vncContent.innerHTML = `
+                    <iframe class="vnc-container" src="${session.vnc.noVncUrl}"></iframe>
+                `;
+            } else {
+                vncContent.innerHTML = `
+                    <div style="background: var(--gray-100); padding: 24px; border-radius: 8px;">
+                        <p style="color: var(--gray-700); margin-bottom: 12px;">
+                            <strong>VNC Connection Info:</strong>
+                        </p>
+                        <p style="color: var(--gray-600); margin-bottom: 8px;">
+                            The browser session is running. You can take a screenshot to see the current state.
+                        </p>
+                        <button class="btn btn-primary" onclick="takeScreenshot('${sessionId}')" style="margin-top: 12px;">
+                            📸 Take Screenshot
+                        </button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('vncModal').classList.add('active');
+        }
+
+        function closeVncModal() {
+            currentVncSessionId = null;
+            document.getElementById('vncModal').classList.remove('active');
+        }
+
+        async function takeScreenshot(sessionId) {
+            window.open(`${API_URL}/api/sessions/${sessionId}/screenshot`, '_blank');
+        }
+
+        // Toast Notifications
+        function showToast(notification, job = null) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `notification-toast ${notification.type || 'info'}`;
+            toast.innerHTML = `
+                <div class="notification-toast-header">
+                    <span class="notification-toast-title">${job ? escapeHtml(job.title) : 'Notification'}</span>
+                    <button class="notification-toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+                <div class="notification-toast-body">${escapeHtml(notification.message)}</div>
+            `;
+            container.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function addToActivityLog(data) {
+            activityLog.unshift({
+                timestamp: new Date().toISOString(),
+                ...data.notification,
+                job: data.job
+            });
+            activityLog = activityLog.slice(0, 100); // Keep last 100
+            renderActivityLog();
+        }
+
+        function renderActivityLog() {
+            const log = document.getElementById('activityLog');
+            if (activityLog.length === 0) {
+                log.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No activity yet</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            log.innerHTML = activityLog.map(entry => `
+                <div class="notification ${entry.type || 'info'}" style="margin-bottom: 8px;">
+                    <div class="notification-time">${new Date(entry.timestamp).toLocaleString()}</div>
+                    ${entry.job ? `<div style="font-size: 12px; color: var(--gray-500);">${escapeHtml(entry.job.title)} - ${escapeHtml(entry.job.company)}</div>` : ''}
+                    <div class="notification-message">${escapeHtml(entry.message)}</div>
+                </div>
+            `).join('');
+        }
+
+        function clearNotifications() {
+            activityLog = [];
+            renderActivityLog();
+        }
+
+        // Utilities
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTime(isoString) {
+            return new Date(isoString).toLocaleTimeString();
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'initializing': 'Starting',
+                'loading': 'Loading',
+                'autofilling': 'Auto-filling',
+                'waiting_for_user': 'Waiting for User',
+                'completed': 'Completed',
+                'error': 'Error'
+            };
+            return statusMap[status] || status;
+        }
+    </script>
+</body>
+</html>

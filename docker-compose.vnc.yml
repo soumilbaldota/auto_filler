@@ -1,0 +1,33 @@
+services:
+  auto-filler:
+    build:
+      context: .
+      dockerfile: Dockerfile.vnc
+    ports:
+      - "3000:3000"   # HTTP API & Dashboard
+      - "3001:3001"   # WebSocket
+      - "5900:5900"   # VNC
+      - "6080:6080"   # noVNC web client
+    environment:
+      - NODE_ENV=production
+      - DISPLAY=:99
+    env_file:
+      - .env
+    volumes:
+      - ./browser-data:/app/browser-data
+      - ./extensions:/app/extensions
+      - ./screenshots:/app/screenshots
+    restart: unless-stopped
+    networks:
+      - auto-filler-network
+    # Enable shared memory for browsers
+    shm_size: 2gb
+    # Security options for browser automation
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+
+networks:
+  auto-filler-network:
+    driver: bridge
