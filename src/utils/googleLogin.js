@@ -69,8 +69,10 @@ class GoogleLogin {
       // Check for common Google post-login elements
       const url = this.page.url();
       
-      // If we're redirected to myaccount, we're logged in
-      if (url.includes('myaccount.google.com')) {
+      // Ensure we're on a Google domain and specifically myaccount
+      const urlObj = new URL(url);
+      if (urlObj.hostname === 'myaccount.google.com' || 
+          (urlObj.hostname.endsWith('.google.com') && url.includes('/myaccount'))) {
         return true;
       }
       

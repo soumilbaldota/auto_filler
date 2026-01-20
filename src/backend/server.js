@@ -11,9 +11,43 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const WS_PORT = process.env.WS_PORT || 3001;
 
+// Simple rate limiting middleware
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 60; // 60 requests per minute
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+  
+  const record = rateLimitMap.get(ip);
+  
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + RATE_LIMIT_WINDOW;
+    return next();
+  }
+  
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return res.status(429).json({ 
+      success: false, 
+      error: 'Too many requests. Please try again later.' 
+    });
+  }
+  
+  record.count++;
+  next();
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(rateLimit);
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // Initialize managers
